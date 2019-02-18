@@ -7,6 +7,7 @@ import {
     Col,
     Input,
     Button,
+    Switch,
     List,
     ListItem,
     Icon,
@@ -21,7 +22,10 @@ class Skeleton extends React.Component {
         this.state = {
             query: '',
             movies: [],
+            sortByTime: false,
+            sortByRating: false,
         };
+        this.unsorted = [];
     }
 
     renderMovie = movie => {
@@ -42,9 +46,48 @@ class Skeleton extends React.Component {
                     <span>{_.get(movie, 'title[0]')}</span>
                     <span style={{ color: 'gray' }}>{tagline}</span>
                 </div>
-                <div className="expandable-content">{movie.overview}</div>
+                <div className="expandable-content">
+                    <p>{movie.overview}</p>
+                    <p>
+                        <a
+                            onClick={() => window.alert('not implemented yet')}
+                            style={{ color: 'blue' }}>
+                            <u>
+                                <i>See more like this</i>
+                            </u>
+                        </a>
+                    </p>
+                </div>
             </ListItem>
         );
+    };
+
+    resort = (type, e) => {
+        // Update UI
+        if (typeof type !== 'undefined') {
+            const newState = {};
+            newState[type] = e.target.checked;
+            this.setState(newState);
+        }
+
+        // Resort movies
+        let sortOrder = [];
+        if (this.state.sortByRevenue) sortOrder.push('revenue');
+        if (this.state.sortByRating) sortOrder.push('vote_average');
+        if (this.state.sortByTime) sortOrder.push('release_date');
+
+        let newList = [];
+        if (sortOrder.length)
+            newList = _.orderBy(this.unsorted, sortOrder, [
+                'desc',
+                'desc',
+                'desc',
+            ]);
+        else newList = this.unsorted;
+
+        console.log(newList);
+
+        this.setState({ movies: newList });
     };
 
     search = () => {
@@ -61,7 +104,8 @@ class Skeleton extends React.Component {
                 console.log('Response');
                 console.log(json);
 
-                this.setState({ movies: json });
+                this.unsorted = json;
+                this.resort();
             });
     };
 
@@ -82,6 +126,41 @@ class Skeleton extends React.Component {
                             style={{ margin: '15px' }}>
                             Search
                         </Button>
+                    </Col>
+                    <Col>
+                        <Row>
+                            <Col verticalAlign="bottom">
+                                Sort by <b>Blockbuster</b> &nbsp;&nbsp;&nbsp;
+                            </Col>
+                            <Col verticalAlign="bottom">
+                                <Switch
+                                    checked={this.state.sortByRevenue}
+                                    onChange={e =>
+                                        this.resort('sortByRevenue', e)
+                                    }
+                                />
+                            </Col>
+                            <Col verticalAlign="bottom">
+                                Sort by <b>Rating</b> &nbsp;&nbsp;&nbsp;
+                            </Col>
+                            <Col verticalAlign="bottom">
+                                <Switch
+                                    checked={this.state.sortByRating}
+                                    onChange={e =>
+                                        this.resort('sortByRating', e)
+                                    }
+                                />
+                            </Col>
+                            <Col verticalAlign="bottom">
+                                Sort by <b>Recent</b> &nbsp;&nbsp;&nbsp;
+                            </Col>
+                            <Col verticalAlign="bottom">
+                                <Switch
+                                    checked={this.state.sortByTime}
+                                    onChange={e => this.resort('sortByTime', e)}
+                                />
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
 
