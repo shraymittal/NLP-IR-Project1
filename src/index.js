@@ -1,23 +1,25 @@
 import React from 'react';
 import { render } from 'react-dom';
 import ons from 'onsenui';
-import { Page, Row, Col, Input, Button, List, ListItem } from 'react-onsenui';
+import {
+    Page,
+    Row,
+    Col,
+    Input,
+    Button,
+    List,
+    ListItem,
+    Icon,
+} from 'react-onsenui';
 
 class Skeleton extends React.Component {
     constructor(props) {
         super(props);
 
+        this.url = 'http://localhost:5000/api/';
         this.state = {
             query: '',
-            movies: [
-                {
-                    name: 'The Avengers',
-                    img:
-                        'https://nerdist.com/wp-content/uploads/2018/05/landscape-1500632962-avengers-assemble.jpg',
-                    rating: 10,
-                    desc: 'Badass superheroes',
-                },
-            ],
+            movies: [],
         };
     }
 
@@ -25,29 +27,34 @@ class Skeleton extends React.Component {
         return (
             <ListItem key={Math.random()} expandable tappable>
                 <div className="left">
-                    <img
-                        src={movie.img}
-                        alt={movie.name}
-                        style={{
-                            height: '100px',
-                            width: '100px',
-                        }}
-                    />
+                    {movie.vote_average}
+                    <Icon className="material-icons">star_half</Icon>
                 </div>
-                <div className="center">{movie.name}</div>
-                <div className="expandable-content">{movie.desc}</div>
+                <div className="center">{movie.title[0]}</div>
+                <div className="expandable-content">{movie.overview}</div>
             </ListItem>
         );
     };
 
     search = () => {
-        //
+        fetch(this.url + 'search', {
+            method: 'post',
+            headers: new Headers({
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json',
+            }),
+            body: JSON.stringify({ query: this.state.query }),
+        })
+            .then(response => response.json())
+            .then(json => {
+                this.setState({ movies: json });
+            });
     };
 
     render = () => {
         return (
             <Page>
-                <Row style={{ margin: '10px' }}>
+                <Row style={{ padding: '10px' }}>
                     <Col style={{ margin: 'auto', textAlign: 'center' }}>
                         <Input
                             value={this.state.query}

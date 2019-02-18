@@ -1,6 +1,6 @@
 import pysolr
 from pysolr import safe_urlencode
-from query import Query
+from app.query import Query
 import pprint
 
 pretty = pprint.PrettyPrinter(indent = 2)
@@ -90,3 +90,4 @@ if __name__ == "__main__":
 	solr.search("funny New York movies")
 	solr.search("shittiest movie")
 	solr.search("greatest James Bond movie")
+	solr.search("scary scifi films")
