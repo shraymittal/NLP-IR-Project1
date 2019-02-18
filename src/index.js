@@ -11,6 +11,7 @@ import {
     ListItem,
     Icon,
 } from 'react-onsenui';
+import _ from 'lodash';
 
 class Skeleton extends React.Component {
     constructor(props) {
@@ -24,13 +25,23 @@ class Skeleton extends React.Component {
     }
 
     renderMovie = movie => {
+        let rating = _.get(movie, 'vote_average', '--');
+        if (rating !== '--')
+            rating = parseFloat(Math.round(rating * 100) / 100).toFixed(1);
+
+        let tagline = _.get(movie, 'tagline[0]');
+        if (tagline) tagline = `: ${tagline}`;
+
         return (
             <ListItem key={Math.random()} expandable tappable>
                 <div className="left">
-                    {movie.vote_average}
+                    {rating}
                     <Icon className="material-icons">star_half</Icon>
                 </div>
-                <div className="center">{movie.title[0]}</div>
+                <div className="center">
+                    <span>{_.get(movie, 'title[0]')}</span>
+                    <span style={{ color: 'gray' }}>{tagline}</span>
+                </div>
                 <div className="expandable-content">{movie.overview}</div>
             </ListItem>
         );
@@ -47,6 +58,9 @@ class Skeleton extends React.Component {
         })
             .then(response => response.json())
             .then(json => {
+                console.log('Response');
+                console.log(json);
+
                 this.setState({ movies: json });
             });
     };
