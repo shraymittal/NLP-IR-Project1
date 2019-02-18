@@ -23,7 +23,7 @@ class Skeleton extends React.Component {
 
     renderMovie = movie => {
         return (
-            <ListItem expandable tappable>
+            <ListItem key={Math.random()} expandable tappable>
                 <div className="left">
                     <img
                         src={movie.img}
@@ -73,7 +73,6 @@ class Skeleton extends React.Component {
     };
 }
 
-ons.platform.select('android');
 ons.ready(() => {
     //Render app skeleton
     render(<Skeleton />, document.getElementById('app'));

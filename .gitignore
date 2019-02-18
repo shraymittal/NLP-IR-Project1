@@ -1,3 +1,7 @@
 node_modules/
 venv/
 yarn.lock
+backend/venv/
+backend/app/__pycache__/
+backend/app/api/__pycache__/
+*.pyc
