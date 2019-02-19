@@ -19,6 +19,7 @@ class Skeleton extends React.Component {
         super(props);
 
         this.url = 'http://localhost:5000/api/';
+        this.image_url = 'https://image.tmdb.org/t/p/w500/';
         this.state = {
             query: '',
             movies: [],
@@ -36,6 +37,12 @@ class Skeleton extends React.Component {
         let tagline = _.get(movie, 'tagline[0]');
         if (tagline) tagline = `: ${tagline}`;
 
+        var revenue = String(movie.revenue).replace(
+            /\B(?=(\d{3})+(?!\d))/g,
+            ','
+        );
+        var poster_url = this.image_url + String(movie.poster_path);
+
         return (
             <ListItem key={Math.random()} expandable tappable>
                 <div className="left">
@@ -47,7 +54,16 @@ class Skeleton extends React.Component {
                     <span style={{ color: 'gray' }}>{tagline}</span>
                 </div>
                 <div className="expandable-content">
+                    <a href={poster_url}>Link to movie poster</a>
                     <p>{movie.overview}</p>
+                    <p>
+                        {'Release Year: ' +
+                            String(movie.release_date).substring(0, 4)}
+                    </p>
+                    <p>{'Genres: ' + movie['genres.name']}</p>
+                    <p>{'Director(s): ' + movie['directors.name']}</p>
+                    <p>{'Cast: ' + movie['cast.name']}</p>
+                    <p>{'Revenue: $' + revenue}</p>
                     <p>
                         <a
                             onClick={() => window.alert('not implemented yet')}
