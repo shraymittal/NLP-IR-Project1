@@ -42,17 +42,17 @@ class Solr:
 		return query, dict(results["sort"])
 
 	def recommend(self, query, similarityField, debug=False):
-            results = self.solr.more_like_this(q=query, mltfl=similarityField, mlt='true', handler='/my_morelikethis', **{'mlt.mintf': 1, 'mlt.boost': 'true', 'mlt.qf': 'genres.name^10 overview cast.name^0.5 directors.name^1 belongs_to_collection.name^0.25'})
+		results = self.solr.more_like_this(q=query, mltfl=similarityField, mlt='true', handler='/my_morelikethis', **{'mlt.mintf': 1, 'mlt.boost': 'true', 'mlt.qf': 'genres.name^10 overview cast.name^0.5 directors.name^1 belongs_to_collection.name^0.25'})
 
-	    if debug:
-		    print("Saw {0} result(s).".format(len(results)))
+		if debug:
+			print("Saw {0} result(s).".format(len(results)))
 
-                    for result in results:
-                            #print(result)
-                            print("The title is '{0}'.".format(result['title']))
-                            #print(result.keys())
+			for result in results:
+					#print(result)
+					print("The title is '{0}'.".format(result['title']))
+					#print(result.keys())
 
-            return results
+			return results
 
 	def search(self, rawQuery='*', debug=True):
 		query, sort = self.process(rawQuery, debug)
