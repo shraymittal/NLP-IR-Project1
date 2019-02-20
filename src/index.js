@@ -66,7 +66,15 @@ class Skeleton extends React.Component {
                     <p>{'Revenue: $' + revenue}</p>
                     <p>
                         <a
-                            onClick={() => window.alert('not implemented yet')}
+                            onClick={() => {
+                                this.setState({
+                                    query: 'more like: ' + movie['title'],
+                                });
+                                this.setState(
+                                    { mlt_query: 'id:' + movie['id'] },
+                                    this.recommend
+                                );
+                            }}
                             style={{ color: 'blue' }}>
                             <u>
                                 <i>See more like this</i>
@@ -114,6 +122,25 @@ class Skeleton extends React.Component {
                 'Content-Type': 'application/json',
             }),
             body: JSON.stringify({ query: this.state.query }),
+        })
+            .then(response => response.json())
+            .then(json => {
+                console.log('Response');
+                console.log(json);
+
+                this.unsorted = json;
+                this.resort();
+            });
+    };
+
+    recommend = () => {
+        fetch(this.url + 'morelikethis', {
+            method: 'post',
+            headers: new Headers({
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json',
+            }),
+            body: JSON.stringify({ query: this.state.mlt_query }),
         })
             .then(response => response.json())
             .then(json => {

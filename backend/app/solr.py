@@ -43,23 +43,23 @@ class Solr:
 		return query, sortBy
 
 	def recommend(self, query, similarityField, debug=False):
-		results = self.solr.more_like_this(q=query, mltfl=similarityField, mlt="true", handler=None)
+                results = self.solr.more_like_this(q=query, mltfl=similarityField, mlt='true', handler='/my_morelikethis', **{'mlt.mintf': 1, 'mlt.boost': 'true', 'mlt.mindf': 5})
 
 		if debug:
-			print("Saw {0} result(s).".format(len(results.moreLikeThis)))
+			print("Saw {0} result(s).".format(len(results)))
 
-			for movieID, result in results.moreLikeThis.items():
-				print(result)
-				# print("The title is '{0}'.".format(result['title']))
-
-				print(result.keys())
-
+			for result in results:
+				#print(result)
+				print("The title is '{0}'.".format(result['title']))
+				#print(result.keys())
 
 		return results
 
 	def search(self, rawQuery='*', debug=True):
 		query, sort = self.process(rawQuery, debug=False)
-		results = self.solr.search(query, sort=sort)
+		results = self.solr.search(query, sort=sort, rows=100)
+
+                print(len(results))
 
 		if debug:
 			print()

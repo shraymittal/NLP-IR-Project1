@@ -24,3 +24,18 @@ def search():
     response.status_code = 200
 
     return response
+
+@app.route('/api/morelikethis', methods=['POST'])
+def morelikethis():
+    data = request.get_json()
+    query = data.get("query")
+
+    my_solr = solr.Solr()
+    movies = my_solr.recommend(query, 'overview,genres.name', debug=True)
+    movies = dict(movies.raw_response)['moreLikeThis'][query[3:]]['docs']
+    movies_encoded = [dict(movie) for movie in movies]
+
+    response = jsonify(movies_encoded)
+    response.status_code = 200
+
+    return response
