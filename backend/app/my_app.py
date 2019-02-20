@@ -30,7 +30,8 @@ def morelikethis():
     query = data.get("query")
 
     my_solr = Solr()
-    movies = my_solr.recommend(query, 'overview,genres.name', debug=False)
+    movies = my_solr.recommend(query, 'overview,genres.name,cast.name,directors.name,belongs_to_collection.name', debug=False)
+
     movies = dict(movies.raw_response)['moreLikeThis'][query[3:]]['docs']
     movies_encoded = [dict(movie) for movie in movies]
 
