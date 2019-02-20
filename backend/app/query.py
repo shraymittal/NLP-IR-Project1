@@ -55,12 +55,14 @@ class Query:
 				reducedQuery = reducedQuery.replace(original, self.require(original))
 				continue
 
+			if label == "PERSON":
+				results["people"] = entity # Cannot differentiate between multiple names
+				continue
+
 			# All other entities, remove entity from original query
 			for word in original.split(" "):
 				reducedQuery = reducedQuery.replace(word, "")
 
-			if label == "PERSON":
-				results["people"] = entity # Cannot differentiate between multiple names
 			if label == "GENRE":
 				results["genres"].append(entity)
 			if label == "RELEASE":
@@ -76,8 +78,10 @@ class Query:
 			if sentiment == "negative":
 				sortOrder = "asc"
 
+			sortParam = "vote_average" if type == "JJS" else "revenue"
+
 			if sortOrder:
-				results["sort"].append(("vote_average", sortOrder))
+				results["sort"].append((sortParam, sortOrder))
 
 		if not len(reducedQuery.strip()):
 			results["reduced"] = "*"
@@ -101,7 +105,12 @@ class Query:
 		for token in self.doc:
 			if token.tag_ in ['JJS', 'RBS']:
 				witRequest = witClient.message(token.text)
-				sentiment = witRequest["entities"]["sentiment"][0]["value"]
+				sentiment = None
+				try:
+					sentiment = witRequest["entities"]["sentiment"][0]["value"]
+				except BaseException:
+					sentiment = "neutral"
+					
 				if debug:
 					print("--> %s, %s %s" % (token.text, token.tag_, sentiment))
 				yield token.text, token.tag_, sentiment
