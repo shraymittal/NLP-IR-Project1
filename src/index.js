@@ -23,8 +23,9 @@ class Skeleton extends React.Component {
         this.state = {
             query: '',
             movies: [],
-            sortByTime: false,
-            sortByRating: false,
+            sortByRevenue: null,
+            sortByTime: null,
+            sortByRating: null,
         };
         this.unsorted = [];
     }
@@ -90,28 +91,11 @@ class Skeleton extends React.Component {
         // Update UI
         if (typeof type !== 'undefined') {
             const newState = {};
-            newState[type] = e.target.checked;
+            newState[type] = e.target.checked ? 'desc' : null;
             this.setState(newState);
         }
 
-        // Resort movies
-        let sortOrder = [];
-        if (this.state.sortByRevenue) sortOrder.push('revenue');
-        if (this.state.sortByRating) sortOrder.push('vote_average');
-        if (this.state.sortByTime) sortOrder.push('release_date');
-
-        let newList = [];
-        if (sortOrder.length)
-            newList = _.orderBy(this.unsorted, sortOrder, [
-                'desc',
-                'desc',
-                'desc',
-            ]);
-        else newList = this.unsorted;
-
-        console.log(newList);
-
-        this.setState({ movies: newList });
+        this.sort();
     };
 
     search = () => {
@@ -128,8 +112,14 @@ class Skeleton extends React.Component {
                 console.log('Response');
                 console.log(json);
 
-                this.unsorted = json;
-                this.resort();
+                const newState = {};
+                newState.sortByTime = _.get(json.sort, 'release_date', null);
+                newState.sortByRating = _.get(json.sort, 'vote_average', null);
+                // newState.sortByRevenue = _.get(json.sort, "revenue", null);
+                this.setState(newState);
+
+                this.unsorted = json.movies;
+                this.sort();
             });
     };
 
@@ -150,6 +140,33 @@ class Skeleton extends React.Component {
                 this.unsorted = json;
                 this.resort();
             });
+    };
+
+    sort = () => {
+        // Resort movies
+        let sortOrder = [],
+            sortParams = [];
+        if (this.state.sortByRevenue) {
+            sortParams.push('revenue');
+            sortOrder.push(this.state.sortByRevenue);
+        }
+        if (this.state.sortByRating) {
+            sortParams.push('vote_average');
+            sortOrder.push(this.state.sortByRating);
+        }
+        if (this.state.sortByTime) {
+            sortParams.push('release_date');
+            sortOrder.push(this.state.sortByTime);
+        }
+
+        let newList = [];
+        if (sortOrder.length)
+            newList = _.orderBy(this.unsorted, sortParams, sortOrder);
+        else newList = this.unsorted;
+
+        console.log(newList);
+
+        this.setState({ movies: newList });
     };
 
     render = () => {
@@ -177,7 +194,7 @@ class Skeleton extends React.Component {
                             </Col>
                             <Col verticalAlign="bottom">
                                 <Switch
-                                    checked={this.state.sortByRevenue}
+                                    checked={this.state.sortByRevenue !== null}
                                     onChange={e =>
                                         this.resort('sortByRevenue', e)
                                     }
@@ -188,7 +205,7 @@ class Skeleton extends React.Component {
                             </Col>
                             <Col verticalAlign="bottom">
                                 <Switch
-                                    checked={this.state.sortByRating}
+                                    checked={this.state.sortByRating !== null}
                                     onChange={e =>
                                         this.resort('sortByRating', e)
                                     }
@@ -199,7 +216,7 @@ class Skeleton extends React.Component {
                             </Col>
                             <Col verticalAlign="bottom">
                                 <Switch
-                                    checked={this.state.sortByTime}
+                                    checked={this.state.sortByTime !== null}
                                     onChange={e => this.resort('sortByTime', e)}
                                 />
                             </Col>

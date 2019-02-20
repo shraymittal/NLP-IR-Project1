@@ -1,6 +1,6 @@
 import pysolr
 from pysolr import safe_urlencode
-from query import Query
+from app.query import Query
 import pprint
 
 pretty = pprint.PrettyPrinter(indent = 2)
@@ -25,22 +25,21 @@ class Solr:
 		if debug:
 			print(results)
 
-		fields = [field +": "+ results["reduced"] for field in self.fields["main"]]
+		fields = ["title:(%s)^2" % results["reduced"], "overview:%s" % results["reduced"]]
+		# fields = [field +": "+ results["reduced"] for field in self.fields["main"]]
 		query = "(" + " OR ".join(fields) + ")"
 
 		if results["people"]:
 			fields = [field +": "+ Query.require(results["people"]) for field in self.fields["people"]]
 			subQuery = "(" + " OR ".join(fields) + ")"
-			query += " AND " + subQuery
+			query += " OR " + subQuery
 
 		if results["genres"]:
 			fields = ["genres.name: " + Query.require(genre) for genre in results["genres"]]
 			subQuery = "(" + " AND ".join(fields) + ")"
 			query += " AND " + subQuery
 
-		sortBy = ",".join(sortTuple[0] +" "+ sortTuple[1] for sortTuple in results["sort"])
-
-		return query, sortBy
+		return query, dict(results["sort"])
 
 	def recommend(self, query, similarityField, debug=False):
                 results = self.solr.more_like_this(q=query, mltfl=similarityField, mlt='true', handler='/my_morelikethis', **{'mlt.mintf': 1, 'mlt.boost': 'true', 'mlt.mindf': 5})
@@ -56,10 +55,8 @@ class Solr:
 		return results
 
 	def search(self, rawQuery='*', debug=True):
-		query, sort = self.process(rawQuery, debug=False)
-		results = self.solr.search(query, sort=sort, rows=100)
-
-                print(len(results))
+		query, sort = self.process(rawQuery, debug)
+		results = self.solr.search(query, fl="*,score")
 
 		if debug:
 			print()
@@ -73,7 +70,10 @@ class Solr:
 			for result in results:
 				print("The title is '{0}'.".format(result['title']))
 
-		return results
+		return {
+			"movies": [dict(movie) for movie in results],
+			"sort": sort,
+		}
 
 
 if __name__ == "__main__":

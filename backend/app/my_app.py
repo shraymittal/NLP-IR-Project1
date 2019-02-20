@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import solr
+from solr import Solr
 
 
 app = Flask(__name__)
@@ -16,11 +16,10 @@ def search():
     data = request.get_json()
     query = data.get("query")
 
-    my_solr = solr.Solr()
-    movies = my_solr.search(query, debug=False)
-    movies_encoded = [dict(movie) for movie in movies]
+    my_solr = Solr()
+    results = my_solr.search(query, debug=True)
 
-    response = jsonify(movies_encoded)
+    response = jsonify(results)
     response.status_code = 200
 
     return response
@@ -30,8 +29,8 @@ def morelikethis():
     data = request.get_json()
     query = data.get("query")
 
-    my_solr = solr.Solr()
-    movies = my_solr.recommend(query, 'overview,genres.name', debug=True)
+    my_solr = Solr()
+    movies = my_solr.recommend(query, 'overview,genres.name', debug=False)
     movies = dict(movies.raw_response)['moreLikeThis'][query[3:]]['docs']
     movies_encoded = [dict(movie) for movie in movies]
 
